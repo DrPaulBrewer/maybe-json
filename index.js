@@ -13,7 +13,7 @@
 
 const storage = require('@google-cloud/storage')();  // only works without api-key in google cloud environment
 
-exports.maybeJSON = function maybeJSON(event){
+module.exports = function maybeJSON(event){
     return new Promise(function(resolve, reject){
 	const file = event.data;
 	if (!file){
