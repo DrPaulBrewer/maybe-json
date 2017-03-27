@@ -43,7 +43,7 @@ module.exports = function maybeJSON(event){
 	    return resolve();
 	}
 	const storage = storageFactory();  // re-initialize every call when needed
-	promiseRetry(function(retry){	
+	promiseRetry(function(retry, attempt){	
 	    (storage
 	     .bucket(file.bucket)
 	     .file(file.name)
@@ -51,7 +51,11 @@ module.exports = function maybeJSON(event){
 	     .then(function(data){
 		 if (data)
 		     return data.toString('utf-8');
-	     }, retry)
+	     }, function(e){
+		 console.log("attempt: "+attempt);
+		 console.log(e);
+		 retry();
+	     })
 	     .then(function(data){
 		 if (data) {
 		     console.log("new file "+file.name);
@@ -59,6 +63,7 @@ module.exports = function maybeJSON(event){
 		     resolve({file:file,data:JSON.parse(data)});
 		 }
 	     }, function(e){
+		 console.log("final rejection at attempt "+attempt);
 		 reject(e);
 	     })
 	    );
