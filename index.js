@@ -11,7 +11,7 @@
  * @return {Promise<{file: Object, data: Object>} Promise of file event object and JSON-parsed data object from file contents
  */
 
-const storage = require('@google-cloud/storage')();  // only works without api-key in google cloud environment
+const storageFactory = require('@google-cloud/storage');
 
 module.exports = function maybeJSON(event){
     return new Promise(function(resolve, reject){
@@ -40,6 +40,7 @@ module.exports = function maybeJSON(event){
 	    console.log("file name not provided");
 	    return resolve();
 	}
+	const storage = storageFactory();  // re-initialize every call when needed
 	(storage
 	 .bucket(file.bucket)
 	 .file(file.name)
