@@ -1,6 +1,6 @@
 {
   "name": "maybe-json",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Google Cloud Function helper to log and transform bucket events to Promises of new json file metadata and json data",
   "main": "index.js",
   "scripts": {
