@@ -13,11 +13,13 @@
 
 const storageFactory = require('@google-cloud/storage');
 
+const promiseRetry = require('promise-retry');
+
 module.exports = function maybeJSON(event){
     return new Promise(function(resolve, reject){
 	const file = event.data;
 	if (!file){
-            console.log("not a file event");
+	    console.log("not a file event");
 	    return resolve();
 	}
 	if (file.resourceState === 'not_exists'){
@@ -41,22 +43,26 @@ module.exports = function maybeJSON(event){
 	    return resolve();
 	}
 	const storage = storageFactory();  // re-initialize every call when needed
-	(storage
-	 .bucket(file.bucket)
-	 .file(file.name)
-	 .download()
-	 .then(function(data){
-	     if (data)
-		 return data.toString('utf-8');
-	 })
-	 .then(function(data){
-	     if (data) {
-		 console.log("new file "+file.name);
-		 console.log(data);
-		 resolve({file:file,data:JSON.parse(data)});
-	     }
-	 })
-	 .catch(function(e){ reject(e); })
-	     );
+	promiseRetry(function(retry){	
+	    (storage
+	     .bucket(file.bucket)
+	     .file(file.name)
+	     .download()
+	     .then(function(data){
+		 if (data)
+		     return data.toString('utf-8');
+	     }, retry)
+	     .then(function(data){
+		 if (data) {
+		     console.log("new file "+file.name);
+		     console.log(data);
+		     resolve({file:file,data:JSON.parse(data)});
+		 }
+	     }, function(e){
+		 reject(e);
+	     })
+	    );
+	});
     });
 };
+
