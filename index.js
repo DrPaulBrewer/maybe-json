@@ -44,7 +44,7 @@ module.exports = function maybeJSON(event){
 	}
 	const storage = storageFactory();  // re-initialize every call when needed
 	promiseRetry(function(retry, attempt){	
-	    (storage
+	    return (storage
 	     .bucket(file.bucket)
 	     .file(file.name)
 	     .download()
@@ -56,17 +56,15 @@ module.exports = function maybeJSON(event){
 		 console.log(e);
 		 retry();
 	     })
-	     .then(function(data){
-		 if (data) {
-		     console.log("new file "+file.name);
-		     console.log(data);
-		     resolve({file:file,data:JSON.parse(data)});
-		 }
-	     }, function(e){
-		 console.log("final rejection at attempt "+attempt);
-		 reject(e);
-	     })
-	    );
+		   );
+	}).then(function(data){
+	    if (data) {
+		console.log("new file "+file.name);
+		console.log(data);
+		resolve({file:file,data:JSON.parse(data)});
+	    }
+	}, function(e){
+	    reject(e);
 	});
     });
 };
