@@ -11,7 +11,7 @@
  * @return {Promise<{file: Object, data: Object>} Promise of file event object and JSON-parsed data object from file contents
  */
 
-const storage = require('@google-cloud/storage');
+const storage = require('@google-cloud/storage')();
 
 const promiseRetry = require('promise-retry');
 
