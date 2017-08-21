@@ -11,7 +11,7 @@
  * @return {Promise<{file: Object, data: Object>} Promise of file event object and JSON-parsed data object from file contents
  */
 
-const storageFactory = require('@google-cloud/storage');
+const storage = require('@google-cloud/storage');
 
 const promiseRetry = require('promise-retry');
 
@@ -30,8 +30,8 @@ module.exports = function maybeJSON(event){
 	    console.log("not a json file");
 	    return resolve();
 	}
-	if (file.size > 1000000){
-	    console.log("rejecting file "+file.name+" gt 1 MB");
+	if (file.size > 10000000){
+	    console.log("rejecting file "+file.name+" larger than 10 MB");
 	    return resolve();
 	}
 	if (!file.bucket){
@@ -42,7 +42,6 @@ module.exports = function maybeJSON(event){
 	    console.log("file name not provided");
 	    return resolve();
 	}
-	const storage = storageFactory();  // re-initialize every call when needed
 	promiseRetry(function(retry, attempt){	
 	    return (storage
 	     .bucket(file.bucket)
@@ -59,8 +58,7 @@ module.exports = function maybeJSON(event){
 		   );
 	}).then(function(data){
 	    if (data) {
-		console.log("new file "+file.name);
-		console.log(data);
+		console.log("read json file:"+file.name);
 		resolve({file:file,data:JSON.parse(data)});
 	    }
 	}, function(e){
